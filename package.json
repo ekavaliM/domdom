@@ -1,0 +1,15 @@
+{
+  "name": "domdom",
+  "version": "0.0.0",
+  "description": "Testing xml parsers for node.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jsdom": "^0.10.5",
+    "libxmljs": "^0.9.0"
+  }
+}
