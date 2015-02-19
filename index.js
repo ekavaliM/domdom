@@ -4,6 +4,11 @@ var jsdom =require("jsdom");
 var libxmljs = require("libxmljs");
 
 var xmldom = require("xmldom");
+var bb = require("blue-button");
+var bbxml = require("blue-button-xml");
+var bbcms = require("blue-button-cms");
+var bbg = require("blue-button-generate");
+
 
 // from http://ejohn.org/blog/javascript-benchmark-quality/
 function runTest(name, test, next){
@@ -29,7 +34,7 @@ function runTest(name, test, next){
   }, 0);
 }
 
-
+// from libxmljs
 var xml =  '<?xml version="1.0" encoding="UTF-8"?>' +
            '<root>' +
                '<child foo="bar">' +
@@ -39,6 +44,10 @@ var xml =  '<?xml version="1.0" encoding="UTF-8"?>' +
            '</root>';
 
 var xml = fs.readFileSync('./sample.xml', 'utf-8');
+
+var cms = fs.readFileSync("sample.txt").toString(); 
+
+var doc = bb.parse(xml);
 
 //console.log(xml);
 
@@ -62,6 +71,21 @@ console.timeEnd("xmldom")
 
 //console.log(doc2);
 
+console.time("blue-button");
+var doc4 = bb.parse(xml);
+console.timeEnd("blue-button");
+
+console.time("blue-button-xml");
+var doc5 = bbxml.xmlUtil.parse(xml);
+console.timeEnd("blue-button-xml");
+
+console.time("blue-button-cms");
+var doc6 = bbcms.parseText(cms);
+console.timeEnd("blue-button-cms");
+
+console.time("blue-button-generate");
+var doc7 = bbg.generateCCD(doc);
+console.timeEnd("blue-button-generate");
 
 function test1(){
     var doc1 = libxmljs.parseXml(xml);
@@ -75,6 +99,23 @@ function test3(){
     var doc3 = new xmldom.DOMParser().parseFromString(xml, 'text/xml');
 }
 
+//
+function bbtest(){
+    var doc4 = bb.parse(xml);
+}
+
+function bbxmltest(){
+    var doc5 = bbxml.xmlUtil.parse(xml);
+}
+
+function bbcmstest(){
+    var doc6 = bbcms.parseText(cms);
+}
+
+function bbgtest(){
+    var doc7 = bbg.generateCCD(doc);
+}
+
 function done(name, runs){
     console.log("test: "+name+ ", runs: "+runs);
 }
@@ -82,6 +123,10 @@ function done(name, runs){
 runTest("jsdom", test2);
 runTest("libxmljs", test1);
 runTest("xmldom", test3);
+runTest("bb", bbtest);
+runTest("bbxml", bbxmltest);
+runTest("bbcms", bbcmstest);
+runTest("bbg", bbgtest);
 
 /*
 
