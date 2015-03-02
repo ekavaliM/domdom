@@ -1,7 +1,7 @@
 domdom
 ======
 
-Quick test of xml parsers for node.js
+Quick test of parsers for blue button files, output to benchmark.json
 
 
 ```
