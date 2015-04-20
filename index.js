@@ -7,7 +7,9 @@ var xmldom = require("xmldom");
 var bb = require("blue-button");
 var bbxml = require("blue-button-xml");
 var bbcms = require("blue-button-cms");
+var bbfhir = require("blue-button-fhir");
 var bbg = require("blue-button-generate");
+var bbu = require("blue-button-util");
 
 
 // from http://ejohn.org/blog/javascript-benchmark-quality/
@@ -51,7 +53,52 @@ var cms = fs.readFileSync("sample.txt").toString();
 
 var doc = bb.parse(xml);
 
-//console.log(xml);
+
+// compile FHIR bundle
+var cases_a = require('./fixtures/unit/allergyIntolerance');
+var cases_c = require('./fixtures/unit/condition');
+var cases_ma = require('./fixtures/unit/medicationAdministration');
+var cases_mp = require('./fixtures/unit/medicationPrescription');
+var cases_ors = require('./fixtures/unit/observation-result-single');
+var cases_or = require('./fixtures/unit/observation-result');
+var cases_ov = require('./fixtures/unit/observation-vital');
+var cases_p = require('./fixtures/unit/patient');
+
+var arrayset = bbu.arrayset;
+
+var resources = [];
+
+var sections = [
+    'allergies',
+    'problems',
+    'medications',
+    'medications',
+    'results',
+    'results',
+    'vitals'
+];
+
+[cases_a, cases_c, cases_ma, cases_mp, cases_ors, cases_or, cases_ov].forEach(function (cmodule, index) {
+    var sectionName = sections[index];
+    cmodule.forEach(function (c) {
+        arrayset.append(resources, c.resources);
+    });
+});
+arrayset.append(resources, cases_p[0].resources);
+
+var bundle = {
+    resourceType: 'Bundle',
+    entry: resources
+};
+
+var actual = bbfhir.toModel(bundle);
+
+
+console.log('bundle', bundle);
+
+console.log('\n');
+
+console.log('actual FHIR model', actual);
 
 // console.time("libxmljs");
 // var doc1 = libxmljs.parseXml(xml);
@@ -89,6 +136,11 @@ console.time("blue-button-generate");
 var doc7 = bbg.generateCCD(doc);
 console.timeEnd("blue-button-generate");
 
+console.time("blue-button-fhir");
+var doc8 = bbfhir.toModel(bundle);
+console.timeEnd("blue-button-fhir");
+
+
 // function test1() {
 //     var doc1 = libxmljs.parseXml(xml);
 // }
@@ -118,6 +170,10 @@ function bbgtest() {
     var doc7 = bbg.generateCCD(doc);
 }
 
+function bbfhirtest() {
+    var doc8 = bbfhir.toModel(bundle);
+}
+
 function done(name, runs) {
     console.log("test: " + name + ", runs: " + runs);
     var timestamp = new Date();
@@ -137,10 +193,11 @@ function done(name, runs) {
 // runTest("xmldom", test3);
 
 
-runTest("bb", bbtest);
-runTest("bbxml", bbxmltest);
-runTest("bbcms", bbcmstest);
-runTest("bbg", bbgtest);
+// runTest("bb", bbtest);
+// runTest("bbxml", bbxmltest);
+// runTest("bbcms", bbcmstest);
+// runTest("bbg", bbgtest);
+runTest("bbfhir", bbfhirtest);
 
 
 /*
